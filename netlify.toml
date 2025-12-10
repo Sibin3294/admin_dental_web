@@ -1,0 +1,11 @@
+[build]
+  publish = "build/web"
+  command = "flutter build web --release"
+
+[build.environment]
+  NODE_VERSION = "18"
+  # Optional but recommended
+  TZ = "Asia/Kolkata"
+
+[[plugins]]
+  package = "netlify-plugin-flutter"
