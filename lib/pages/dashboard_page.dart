@@ -61,11 +61,11 @@ class _DashboardPageState extends State<DashboardPage> {
         const AppointmentsPage(),
         const DentistsListPage(),
         const PatientsListPage(),
+        const EnquiriesListPage(),
         const AllPaymentsPage(),
         const BranchesListPage(),
         const ServiceVideoPage(),
         const PackagesListPage(),
-        const EnquiriesListPage(),
         const SettingsPage(),
       ];
 

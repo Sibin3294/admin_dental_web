@@ -23,11 +23,11 @@ class _SideBarState extends State<SideBar> {
     _NavItem(Icons.calendar_month_rounded, 'Appointments', 1),
     _NavItem(Icons.medical_services_rounded, 'Dentists', 2),
     _NavItem(Icons.people_alt_rounded, 'Patients', 3),
-    _NavItem(Icons.payments_rounded, 'Payments', 4),
-    _NavItem(Icons.store_mall_directory_rounded, 'Branches', 5),
-    _NavItem(Icons.play_circle_outline_rounded, 'Videos', 6),
-    _NavItem(Icons.inventory_2_rounded, 'Packages', 7),
-    _NavItem(Icons.contact_support_rounded, 'Enquiries', 8),
+    _NavItem(Icons.contact_support_rounded, 'Enquiries', 4),
+    _NavItem(Icons.payments_rounded, 'Payments', 5),
+    _NavItem(Icons.store_mall_directory_rounded, 'Branches', 6),
+    _NavItem(Icons.play_circle_outline_rounded, 'Videos', 7),
+    _NavItem(Icons.inventory_2_rounded, 'Packages', 8),
     _NavItem(Icons.settings_rounded, 'Settings', 9),
   ];
 
