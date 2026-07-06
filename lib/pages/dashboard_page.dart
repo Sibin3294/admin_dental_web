@@ -12,6 +12,7 @@ import 'package:dental_admin_web/services/appointment_service.dart';
 import 'package:dental_admin_web/services/dentist_service.dart';
 import 'package:dental_admin_web/services/patient_service.dart';
 import 'package:dental_admin_web/providers/enquiry_provider.dart';
+import 'package:dental_admin_web/services/auth_service.dart';
 import 'package:dental_admin_web/services/payment_service.dart';
 import 'package:dental_admin_web/theme/app_colors.dart';
 import 'package:dental_admin_web/widgets/admin_card.dart';
@@ -49,6 +50,12 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _refreshCounts();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final loggedIn = await AuthService.isLoggedIn();
+      if (!loggedIn && mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      }
+    });
   }
 
   Future<void> _refreshCounts() async {

@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   http: ^1.2.2
   provider:
+  shared_preferences: ^2.2.3
   intl: ^0.20.0
   fl_chart: ^0.68.0
   table_calendar: ^3.0.9 

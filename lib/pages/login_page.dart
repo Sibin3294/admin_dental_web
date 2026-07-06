@@ -93,7 +93,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Sign in to manage appointments, patients, and clinic operations.',
+                            'Only authorized admin accounts can sign in.',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: AppColors.textSecondary,

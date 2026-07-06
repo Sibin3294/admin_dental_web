@@ -1,7 +1,9 @@
 import 'package:dental_admin_web/config/api_config.dart';
+import 'package:dental_admin_web/services/auth_service.dart';
 import 'package:dental_admin_web/theme/app_colors.dart';
 import 'package:dental_admin_web/widgets/admin_card.dart';
 import 'package:dental_admin_web/widgets/admin_page_layout.dart';
+import 'package:dental_admin_web/widgets/admin_users_section.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -42,6 +44,9 @@ class SettingsPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            _sectionTitle(context, 'Admin Users'),
+            const AdminUsersSection(),
             const SizedBox(height: 20),
             _sectionTitle(context, 'General'),
             _settingsCard(
@@ -112,7 +117,16 @@ class SettingsPage extends StatelessWidget {
                   icon: Icons.logout_rounded,
                   title: 'Logout',
                   subtitle: 'Sign out of your account',
-                  onTap: () {},
+                  onTap: () async {
+                    await AuthService.logout();
+                    if (context.mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/',
+                        (route) => false,
+                      );
+                    }
+                  },
                 ),
               ],
             ),
