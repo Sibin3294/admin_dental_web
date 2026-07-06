@@ -491,6 +491,227 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   //   }
   // }
 
+  Future<void> _saveSpotVisit({
+    required DateTime date,
+    required String patientId,
+    required String reason,
+    required String dentistId,
+    String? branchId,
+  }) async {
+    final newStart = date;
+    final newEnd = date.add(const Duration(minutes: 30));
+
+    try {
+      await appointmentService.createSpotAppointment({
+        "patientId": patientId,
+        "reason": reason,
+        "dentist": dentistId,
+        if (branchId != null && branchId.isNotEmpty) "branch": branchId,
+        "startTime": newStart.toUtc().toIso8601String(),
+        "endTime": newEnd.toUtc().toIso8601String(),
+      });
+
+      await loadAppointments();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Spot visit recorded successfully")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to record spot visit: $e")),
+        );
+      }
+    }
+  }
+
+  Future<void> _openSpotVisitDialog() async {
+    final branchProvider = Provider.of<BranchProvider>(context, listen: false);
+    if (branchProvider.branches.isEmpty) {
+      await branchProvider.fetchBranches();
+    }
+
+    final now = DateTime.now();
+    Dentist? selectedDentist;
+    Patient? selectedPatient;
+    Branch? selectedBranch;
+    if (branchProvider.activeBranches.isNotEmpty) {
+      selectedBranch = branchProvider.activeBranches.first;
+    }
+    final reasonCtrl = TextEditingController();
+    TimeOfDay selectedTime = TimeOfDay.fromDateTime(now);
+
+    await showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          final activeBranches =
+              Provider.of<BranchProvider>(context).activeBranches;
+          if (selectedBranch == null && activeBranches.isNotEmpty) {
+            selectedBranch = activeBranches.first;
+          }
+
+          return AlertDialog(
+            title: const Text("Record Spot Visit"),
+            content: SingleChildScrollView(
+              child: SizedBox(
+                width: 420,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "For patients who walk in without booking through the app.",
+                      style: TextStyle(color: Colors.grey.shade700),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Visit time: ${now.toLocal().toString().split(' ')[0]} ${selectedTime.format(context)}",
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime,
+                        );
+                        if (picked != null) {
+                          setState(() => selectedTime = picked);
+                        }
+                      },
+                      child: const Text("Adjust Time"),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.person),
+                      label: Text(selectedDentist?.name ?? "Select Dentist"),
+                      onPressed: () async {
+                        final dentist = await openDentistSelectionDialog(
+                          context,
+                          allDentists,
+                        );
+                        if (dentist != null) {
+                          setState(() => selectedDentist = dentist);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    if (activeBranches.isEmpty)
+                      const Text(
+                        'Add a branch from the Branches menu first.',
+                        style: TextStyle(color: Colors.orange),
+                      )
+                    else
+                      DropdownButtonFormField<Branch>(
+                        value: selectedBranch,
+                        decoration: const InputDecoration(
+                          labelText: "Branch *",
+                          border: OutlineInputBorder(),
+                        ),
+                        items: activeBranches
+                            .map(
+                              (branch) => DropdownMenuItem(
+                                value: branch,
+                                child: Text(branch.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (branch) {
+                          setState(() => selectedBranch = branch);
+                        },
+                      ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<Patient>(
+                      value: selectedPatient,
+                      decoration: const InputDecoration(
+                        labelText: "Select Patient *",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: allPatients
+                          .map(
+                            (patient) => DropdownMenuItem(
+                              value: patient,
+                              child: Text(
+                                "${patient.name}${(patient.phone ?? '').isNotEmpty ? ' (${patient.phone})' : ''}",
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (patient) {
+                        setState(() => selectedPatient = patient);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: reasonCtrl,
+                      decoration: const InputDecoration(
+                        labelText: "Reason / Visit notes",
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (selectedDentist == null || selectedPatient == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select patient and dentist'),
+                      ),
+                    );
+                    return;
+                  }
+                  if (selectedBranch == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please select a branch')),
+                    );
+                    return;
+                  }
+                  if (reasonCtrl.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a reason')),
+                    );
+                    return;
+                  }
+
+                  final visitTime = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    selectedTime.hour,
+                    selectedTime.minute,
+                  );
+
+                  _saveSpotVisit(
+                    patientId: selectedPatient!.userId,
+                    dentistId: selectedDentist!.id,
+                    reason: reasonCtrl.text.trim(),
+                    date: visitTime,
+                    branchId: selectedBranch?.id,
+                  );
+                  Navigator.pop(context);
+                },
+                child: const Text("Record Visit"),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    reasonCtrl.dispose();
+  }
+
   Future<void> _saveAppointment({
   required DateTime date,
   required String patientId,
@@ -544,6 +765,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           ],
         ),
         actions: [
+          ElevatedButton.icon(
+            onPressed: _openSpotVisitDialog,
+            icon: const Icon(Icons.directions_walk_rounded, size: 20),
+            label: const Text(
+              "Spot Visit",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange.shade700,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 8),
           TextButton.icon(
             onPressed: () {
               Navigator.push(
@@ -845,13 +1081,15 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             .map((a) {
           final patientName = a.patient?.name ?? "Unknown Patient";
           final dentistName = a.dentist?.name ?? "No Dentist";
+          final isSpot = a.isSpotVisit;
 
           return Appointment(
             startTime: a.startTime.toLocal(),
             endTime: a.endTime.toLocal(),
-            subject: "$patientName - ${a.reason} ($dentistName)",
+            subject:
+                "${isSpot ? '[Spot] ' : ''}$patientName - ${a.reason} ($dentistName)",
             notes: a.branch?.name ?? '',
-            color: Colors.green,
+            color: isSpot ? Colors.orange.shade700 : Colors.green,
           );
         }).toList();
         print("Mapped appointments for calendar:");

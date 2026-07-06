@@ -6,6 +6,24 @@ import 'package:http/http.dart' as http;
 class AppointmentService {
   String get apiBaseUrl => ApiConfig.appointments;
 
+  /// CREATE spot / walk-in visit
+  Future<AppointmentModel> createSpotAppointment(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse("$apiBaseUrl/createSpotAppointment"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(data),
+    );
+
+    final jsonResponse = jsonDecode(response.body);
+
+    if ((response.statusCode == 200 || response.statusCode == 201) &&
+        jsonResponse['success'] == true) {
+      return AppointmentModel.fromJson(jsonResponse['data']);
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Failed to record spot visit');
+    }
+  }
+
   /// CREATE Appointment
   Future<AppointmentModel> createAppointment(Map<String, dynamic> data) async {
     print("request data");

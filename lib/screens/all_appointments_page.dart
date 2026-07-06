@@ -19,6 +19,7 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
   String? selectedDentist;
   String? selectedBranch;
   String? selectedStatus;
+  String? selectedType;
   String selectedSort = 'Latest'; // Latest / Oldest
   DateTime? selectedDate;
   bool filterByWeek = false;
@@ -61,6 +62,11 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
     // Filter by status
     if (selectedStatus != null && selectedStatus!.isNotEmpty) {
       temp = temp.where((a) => a.status == selectedStatus).toList();
+    }
+
+    // Filter by appointment type
+    if (selectedType != null && selectedType!.isNotEmpty) {
+      temp = temp.where((a) => a.appointmentType == selectedType).toList();
     }
 
     // Filter by specific date
@@ -323,6 +329,34 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                           ],
                         ),
 
+                        // Type filter
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.category_outlined,
+                                color: Colors.teal),
+                            const SizedBox(width: 6),
+                            DropdownButton<String>(
+                              hint: const Text("Type"),
+                              value: selectedType,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: "online",
+                                  child: Text("App Booking"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "spot",
+                                  child: Text("Spot Visit"),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() => selectedType = value);
+                                applyFilters();
+                              },
+                            ),
+                          ],
+                        ),
+
                         // Date picker
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
@@ -393,6 +427,7 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                               selectedDentist = null;
                               selectedBranch = null;
                               selectedStatus = null;
+                              selectedType = null;
                               selectedDate = null;
                               filterByWeek = false;
                               selectedSort = "Latest";
@@ -438,15 +473,40 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  appt.patient!.name,
-                                 
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black87,
+                                Expanded(
+                                  child: Text(
+                                    appt.patient!.name,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
+                                    ),
                                   ),
                                 ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: (appt.isSpotVisit
+                                            ? Colors.orange
+                                            : Colors.teal)
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    appt.isSpotVisit ? 'Spot Visit' : 'App Booking',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: appt.isSpotVisit
+                                          ? Colors.orange.shade800
+                                          : Colors.teal,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
                                       Navigator.push(

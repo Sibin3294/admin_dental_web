@@ -13,6 +13,7 @@ class AppointmentModel {
   final DateTime startTime;
   final DateTime endTime;
   final String status;
+  final String appointmentType;
 
   AppointmentModel({
     required this.id,
@@ -23,8 +24,11 @@ class AppointmentModel {
     this.branch,
     required this.startTime,
     required this.endTime,
-    required this.status
+    required this.status,
+    this.appointmentType = 'online',
   });
+
+  bool get isSpotVisit => appointmentType == 'spot';
 
   // factory AppointmentModel.fromJson(Map<String, dynamic> json) {
   //   return AppointmentModel(
@@ -62,6 +66,7 @@ class AppointmentModel {
     startTime: DateTime.parse(json['startTime']),
     endTime: DateTime.parse(json['endTime']),
     status: json['status'] ?? "scheduled",
+    appointmentType: json['appointmentType'] ?? 'online',
   );
 }
 
