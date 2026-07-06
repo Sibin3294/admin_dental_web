@@ -3,6 +3,7 @@ class Enquiry {
   final String? patientId;
   final String? patientName;
   final String? patientEmail;
+  final String? patientPhone;
   final String subject;
   final String message;
   final String status;
@@ -15,6 +16,7 @@ class Enquiry {
     this.patientId,
     this.patientName,
     this.patientEmail,
+    this.patientPhone,
     required this.subject,
     required this.message,
     required this.status,
@@ -30,11 +32,13 @@ class Enquiry {
     String? patientId;
     String? patientName;
     String? patientEmail;
+    String? patientPhone;
 
     if (patient is Map<String, dynamic>) {
       patientId = patient['_id']?.toString();
       patientName = patient['name']?.toString();
       patientEmail = patient['email']?.toString();
+      patientPhone = patient['phone']?.toString();
     } else if (patient != null) {
       patientId = patient.toString();
     }
@@ -44,6 +48,7 @@ class Enquiry {
       patientId: patientId ?? json['patientId']?.toString(),
       patientName: patientName ?? json['patientName']?.toString(),
       patientEmail: patientEmail ?? json['patientEmail']?.toString(),
+      patientPhone: patientPhone ?? json['patientPhone']?.toString(),
       subject: json['subject'] ?? '',
       message: json['message'] ?? '',
       status: json['status'] ?? 'pending',

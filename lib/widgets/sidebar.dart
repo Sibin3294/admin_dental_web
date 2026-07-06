@@ -4,11 +4,13 @@ import '../theme/app_colors.dart';
 class SideBar extends StatefulWidget {
   final Function(int) onMenuTap;
   final int selectedIndex;
+  final int pendingEnquiryCount;
 
   const SideBar({
     super.key,
     required this.onMenuTap,
     required this.selectedIndex,
+    this.pendingEnquiryCount = 0,
   });
 
   @override
@@ -153,13 +155,33 @@ class _SideBarState extends State<SideBar> {
                     color: isSelected ? AppColors.primaryLight : AppColors.textMuted,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    item.label,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: isSelected ? Colors.white : AppColors.textMuted,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        ),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: isSelected ? Colors.white : AppColors.textMuted,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                    ),
                   ),
+                  if (item.index == 4 && widget.pendingEnquiryCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        widget.pendingEnquiryCount > 99
+                            ? '99+'
+                            : '${widget.pendingEnquiryCount}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

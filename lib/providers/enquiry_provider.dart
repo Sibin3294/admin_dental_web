@@ -9,6 +9,8 @@ class EnquiryProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  int get pendingCount => enquiries.where((e) => !e.isReplied).length;
+
   Future<void> fetchEnquiries() async {
     isLoading = true;
     error = null;

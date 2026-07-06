@@ -35,6 +35,7 @@ class _EnquiriesListPageState extends State<EnquiriesListPage> {
           final q = _searchQuery.toLowerCase();
           if (q.isEmpty) return true;
           return (enquiry.patientName ?? '').toLowerCase().contains(q) ||
+              (enquiry.patientPhone ?? '').toLowerCase().contains(q) ||
               enquiry.subject.toLowerCase().contains(q) ||
               enquiry.message.toLowerCase().contains(q) ||
               enquiry.status.toLowerCase().contains(q);
@@ -51,7 +52,7 @@ class _EnquiriesListPageState extends State<EnquiriesListPage> {
             ),
           ],
           searchField: AdminSearchField(
-            hintText: 'Search by patient, subject, or status...',
+            hintText: 'Search by patient, phone, subject, or status...',
             onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
           ),
           child: _buildBody(context, provider, filtered),
@@ -96,6 +97,7 @@ class _EnquiriesListPageState extends State<EnquiriesListPage> {
           headingRowColor: WidgetStateProperty.all(AppColors.surfaceMuted),
           columns: const [
             DataColumn(label: Text('Patient')),
+            DataColumn(label: Text('Phone')),
             DataColumn(label: Text('Subject')),
             DataColumn(label: Text('Message')),
             DataColumn(label: Text('Status')),
@@ -123,6 +125,13 @@ class _EnquiriesListPageState extends State<EnquiriesListPage> {
                           ),
                         ),
                     ],
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    enquiry.patientPhone?.isNotEmpty == true
+                        ? enquiry.patientPhone!
+                        : '-',
                   ),
                 ),
                 DataCell(Text(enquiry.subject)),
@@ -198,6 +207,9 @@ class _EnquiriesListPageState extends State<EnquiriesListPage> {
                 children: [
                   _detailRow('Patient', enquiry.patientName ?? 'Unknown'),
                   _detailRow('Email', enquiry.patientEmail ?? '-'),
+                  _detailRow('Phone', enquiry.patientPhone?.isNotEmpty == true
+                      ? enquiry.patientPhone!
+                      : '-'),
                   _detailRow('Subject', enquiry.subject),
                   _detailRow('Message', enquiry.message),
                   const SizedBox(height: 12),
