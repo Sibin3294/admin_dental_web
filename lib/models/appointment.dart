@@ -1,5 +1,6 @@
 
 
+import 'package:dental_admin_web/models/branch.dart';
 import 'package:dental_admin_web/models/dentist.dart';
 
 class AppointmentModel {
@@ -8,6 +9,7 @@ class AppointmentModel {
   final String mobile;
   final String reason;
   final Dentist? dentist;
+  final Branch? branch;
   final DateTime startTime;
   final DateTime endTime;
   final String status;
@@ -18,6 +20,7 @@ class AppointmentModel {
     required this.mobile,
     required this.reason,
     required this.dentist,
+    this.branch,
     required this.startTime,
     required this.endTime,
     required this.status
@@ -52,6 +55,9 @@ class AppointmentModel {
     reason: json['reason'] ?? "",
     dentist: json['dentist'] != null
         ? Dentist.fromJson(json['dentist'])
+        : null,
+    branch: json['branch'] != null
+        ? Branch.fromJson(json['branch'])
         : null,
     startTime: DateTime.parse(json['startTime']),
     endTime: DateTime.parse(json['endTime']),

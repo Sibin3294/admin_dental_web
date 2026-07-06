@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class SideBar extends StatefulWidget {
   final Function(int) onMenuTap;
@@ -17,99 +18,162 @@ class SideBar extends StatefulWidget {
 class _SideBarState extends State<SideBar> {
   int _hoverIndex = -1;
 
+  static const _items = [
+    _NavItem(Icons.space_dashboard_rounded, 'Dashboard', 0),
+    _NavItem(Icons.calendar_month_rounded, 'Appointments', 1),
+    _NavItem(Icons.medical_services_rounded, 'Dentists', 2),
+    _NavItem(Icons.people_alt_rounded, 'Patients', 3),
+    _NavItem(Icons.payments_rounded, 'Payments', 4),
+    _NavItem(Icons.store_mall_directory_rounded, 'Branches', 5),
+    _NavItem(Icons.play_circle_outline_rounded, 'Videos', 6),
+    _NavItem(Icons.inventory_2_rounded, 'Packages', 7),
+    _NavItem(Icons.contact_support_rounded, 'Enquiries', 8),
+    _NavItem(Icons.settings_rounded, 'Settings', 9),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
-      color: Colors.white,
+      width: 260,
+      decoration: const BoxDecoration(
+        color: AppColors.sidebar,
+        border: Border(right: BorderSide(color: Color(0xFF1E293B))),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 40),
-          // const Center(
-          //   child: Text(
-          //     "Dr. Smile Admin",
-          //     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          //   ),
-          // ),
-          Center(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
-                  Icons.local_hospital, // professional medical icon
-                  color: Colors.teal,
-                  size: 28,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.secondary],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.local_hospital_rounded, color: Colors.white),
                 ),
-                SizedBox(width: 8),
-                Text(
-                  "Dr. Smile Admin",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dr. Smile',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      Text(
+                        'Admin Console',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 40),
-
-          _menuItem(Icons.dashboard, "Dashboard", 0),
-          _menuItem(Icons.calendar_month, "Appointments", 1),
-          _menuItem(Icons.person, "Dentists", 2),
-          _menuItem(Icons.people, "Patients", 3),
-          _menuItem(Icons.payment, "Payments", 4),
-          _menuItem(Icons.settings, "Settings", 5),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: _items.map((item) => _menuItem(item)).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.sidebarHover,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.health_and_safety_rounded, color: AppColors.primaryLight, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Dental care management',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _menuItem(IconData icon, String title, int index) {
-    bool isSelected = widget.selectedIndex == index;
-    bool isHovering = _hoverIndex == index;
+  Widget _menuItem(_NavItem item) {
+    final isSelected = widget.selectedIndex == item.index;
+    final isHovering = _hoverIndex == item.index;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hoverIndex = index),
-      onExit: (_) => setState(() => _hoverIndex = -1),
-      child: InkWell(
-        onTap: () => widget.onMenuTap(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Colors.blue.shade50
-                : isHovering
-                    ? Colors.grey.shade200
-                    : Colors.white,
-            border: isSelected
-                ? Border(
-                    left: BorderSide(color: Colors.blue.shade700, width: 4),
-                  )
-                : null,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 22,
-                color: isSelected ? Colors.blue.shade700 : Colors.black87,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hoverIndex = item.index),
+        onExit: (_) => setState(() => _hoverIndex = -1),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => widget.onMenuTap(item.index),
+            borderRadius: BorderRadius.circular(12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.sidebarActive
+                    : isHovering
+                        ? AppColors.sidebarHover
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: isSelected
+                    ? Border.all(color: AppColors.primary.withValues(alpha: 0.35))
+                    : null,
               ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isSelected ? Colors.blue.shade700 : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
+              child: Row(
+                children: [
+                  Icon(
+                    item.icon,
+                    size: 20,
+                    color: isSelected ? AppColors.primaryLight : AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    item.label,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: isSelected ? Colors.white : AppColors.textMuted,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+  final int index;
+
+  const _NavItem(this.icon, this.label, this.index);
 }

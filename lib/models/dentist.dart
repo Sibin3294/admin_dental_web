@@ -110,7 +110,7 @@ class Dentist {
   final String? awards;
   final String? specialProcedures;
   final String? website;
-  
+  final Map<String, dynamic>? consultingSchedule;
 
   Dentist({
     required this.id,
@@ -126,6 +126,7 @@ class Dentist {
     this.awards,
     this.specialProcedures,
     this.website,
+    this.consultingSchedule,
     this.hasMoreInfo = false,
   });
 
@@ -146,6 +147,9 @@ class Dentist {
       awards: json['awards'],
       specialProcedures: json['specialProcedures'],
       website: json['website'],
+      consultingSchedule: json['consultingSchedule'] is Map
+          ? Map<String, dynamic>.from(json['consultingSchedule'])
+          : null,
     );
   }
 }

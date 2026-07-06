@@ -1,3 +1,4 @@
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/services/appointment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +13,7 @@ class AppointmentsProvider with ChangeNotifier {
   List<dynamic> history = [];
   bool isLoading = false;
 
-  final String apiBaseUrl = "https://dental-backend-0e7e.onrender.com/api/appointments"; // your backend
+  String get apiBaseUrl => ApiConfig.appointments;
 
   // Future<void> fetchAppointments() async {
   //   try {

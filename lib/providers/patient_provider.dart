@@ -1,5 +1,5 @@
 
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:dental_admin_web/models/patient.dart';
 import 'package:dental_admin_web/services/patient_service.dart';
@@ -12,14 +12,17 @@ class PatientsProvider with ChangeNotifier {
 
   final PatientService _service = PatientService();
 
+  List<Patient> _parsePatients(List<dynamic> data) {
+    return data.map((item) {
+      final map = jsonDecode(jsonEncode(item)) as Map<String, dynamic>;
+      return Patient.fromJson(map);
+    }).toList();
+  }
+
   Future<void> fetchAllPatients() async {
-    print("fetch patients called");
- 
     try {
       final data = await _service.fetchAllPatients();
-      print(_patients);
-      _patients = data.map((e) => Patient.fromJson(e)).toList();
-         print(_patients);
+      _patients = _parsePatients(data);
       notifyListeners();
     } catch (e) {
       rethrow;

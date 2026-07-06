@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/models/all_payment.dart';
 import 'package:dental_admin_web/models/patient_paymentHistory.dart';
 import 'package:dental_admin_web/models/payment.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PaymentProvider with ChangeNotifier {
-  final String baseUrl = "https://dental-backend-0e7e.onrender.com/api/payments";
+  String get baseUrl => ApiConfig.payments;
 
   bool isLoading = false;
   List<Payment> payments = [];
@@ -45,7 +46,7 @@ class PaymentProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse("https://dental-backend-0e7e.onrender.com/api/payments/getAllPayments");
+      final url = Uri.parse('$baseUrl/getAllPayments');
       final res = await http.get(url);
 
       if (res.statusCode == 200) {

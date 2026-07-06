@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl = "https://dental-backend-0e7e.onrender.com/api/auth";
+  static String get baseUrl => ApiConfig.auth;
 
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {

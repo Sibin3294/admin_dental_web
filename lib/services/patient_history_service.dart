@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/models/patient_history.dart';
 import 'package:http/http.dart' as http;
 
 class PatientHistoryService {
-  final String baseUrl = "https://dental-backend-0e7e.onrender.com/api/appointments"; // update
+  String get baseUrl => ApiConfig.appointments;
 
   // Future<List<PatientHistory>> fetchPatientHistory(String patientId) async {
   //   final url = Uri.parse("$baseUrl/$patientId");

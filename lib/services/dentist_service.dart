@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/models/dentist.dart';
+import 'package:dental_admin_web/models/dentist_attendance_model.dart';
 import 'package:http/http.dart' as http;
 
 class DentistService {
-  final String apiBaseUrl = "https://dental-backend-0e7e.onrender.com/api/dentists";
+  String get apiBaseUrl => ApiConfig.dentists;
+  String get attendenceapiBaseUrl => ApiConfig.attendance;
 
   Future<List<dynamic>> fetchAllDentists() async {
     final response = await http.get(Uri.parse('$apiBaseUrl/getAllDentists'));
@@ -130,8 +133,37 @@ Future<bool> updateDentist({
   return result["success"] == true;
 }
 
+Future<Map<String, dynamic>> setConsultingSchedule({
+  required String dentistId,
+  required List<String> days,
+  required String startTime,
+  required String endTime,
+  int slotDurationMinutes = 30,
+  int generateDays = 30,
+}) async {
+  final url = Uri.parse("$apiBaseUrl/$dentistId/consultingSchedule");
+
+  final response = await http.put(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "days": days,
+      "startTime": startTime,
+      "endTime": endTime,
+      "slotDurationMinutes": slotDurationMinutes,
+      "generateDays": generateDays,
+    }),
+  );
+
+  final result = jsonDecode(response.body);
+  if (response.statusCode == 200 && result["success"] == true) {
+    return result;
+  }
+  throw Exception(result["message"] ?? "Failed to save consulting schedule");
+}
+
 static Future<int> getDentistCount() async {
-    final response = await http.get(Uri.parse("https://dental-backend-0e7e.onrender.com/api/dentists/getAllDentists"));
+    final response = await http.get(Uri.parse('${ApiConfig.dentists}/getAllDentists'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/models/appointment.dart';
 import 'package:http/http.dart' as http;
 
 class AppointmentService {
-  // final String apiBaseUrl = "http://localhost:3000/api/appointments";
-  final String apiBaseUrl = "https://dental-backend-0e7e.onrender.com/api/appointments";
+  String get apiBaseUrl => ApiConfig.appointments;
 
   /// CREATE Appointment
   Future<AppointmentModel> createAppointment(Map<String, dynamic> data) async {
@@ -92,7 +92,7 @@ class AppointmentService {
   // get appointment service
 
   static Future<int> getAppointmentCount() async {
-    final response = await http.get(Uri.parse("https://dental-backend-0e7e.onrender.com/api/appointments/getAppointments"));
+    final response = await http.get(Uri.parse('${ApiConfig.appointments}/getAppointments'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

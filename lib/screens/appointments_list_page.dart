@@ -1,11 +1,14 @@
 import 'package:dental_admin_web/models/appointment.dart';
+import 'package:dental_admin_web/models/branch.dart';
 import 'package:dental_admin_web/models/dentist.dart';
 import 'package:dental_admin_web/models/patient.dart';
+import 'package:dental_admin_web/providers/branch_provider.dart';
 import 'package:dental_admin_web/screens/all_appointments_page.dart';
 import 'package:dental_admin_web/services/appointment_service.dart';
 import 'package:dental_admin_web/services/dentist_service.dart';
 import 'package:dental_admin_web/services/patient_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class AppointmentsPage extends StatefulWidget {
@@ -18,7 +21,7 @@ class AppointmentsPage extends StatefulWidget {
 class _AppointmentsPageState extends State<AppointmentsPage> {
   List<Appointment> appointments = [];
 
-  final DentistService dentistService = DentistService(); // <----- ADD THIS
+  final DentistService dentistService = DentistService();
   final PatientService patientService = PatientService();
   List<Dentist> allDentists = [];
   List<Patient> allpatients = [];
@@ -34,6 +37,9 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     loadPatients();
     loadAppointments();
     filterAppointmentsByDay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BranchProvider>(context, listen: false).fetchBranches();
+    });
   }
 
   Future<void> loadDentists() async {
@@ -79,6 +85,11 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   // void _openCreateAppointmentDialog(DateTime selectedDate) async {
   void _openCreateAppointmentDialog(DateTime selectedDate,
       {Appointment? existing}) async {
+    final branchProvider = Provider.of<BranchProvider>(context, listen: false);
+    if (branchProvider.branches.isEmpty) {
+      await branchProvider.fetchBranches();
+    }
+
     // If editing existing appointment, parse the subject
     String initialPatient = "";
     String initialReason = "";
@@ -108,11 +119,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     TextEditingController reasonCtrl = TextEditingController();
     TextEditingController mobileCtrl = TextEditingController();
     TimeOfDay? selectedTime = TimeOfDay.fromDateTime(selectedDate);
+    Branch? selectedBranch;
+    if (branchProvider.activeBranches.isNotEmpty) {
+      selectedBranch = branchProvider.activeBranches.first;
+    }
 
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (context, setState) {
+          final activeBranches =
+              Provider.of<BranchProvider>(context).activeBranches;
+          if (selectedBranch == null && activeBranches.isNotEmpty) {
+            selectedBranch = activeBranches.first;
+          }
+
           return AlertDialog(
             // title: const Text("Create Appointment"),
             title: Text(
@@ -185,11 +206,45 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                   ],
 
                   const SizedBox(height: 10),
-                  // TextField(
-                  //   controller: nameCtrl,
-                  //   decoration:
-                  //       const InputDecoration(labelText: "Patient Name"),
-                  // ),
+
+                  if (activeBranches.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: const Text(
+                        'No active branches found. Add a branch from the Branches menu first.',
+                        style: TextStyle(color: Colors.orange),
+                      ),
+                    )
+                  else
+                    DropdownButtonFormField<Branch>(
+                      value: selectedBranch,
+                      decoration: const InputDecoration(
+                        labelText: "Select Branch *",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: activeBranches.map((branch) {
+                        return DropdownMenuItem<Branch>(
+                          value: branch,
+                          child: Text(branch.name),
+                        );
+                      }).toList(),
+                      onChanged: (branch) {
+                        setState(() {
+                          selectedBranch = branch;
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? 'Please select a branch' : null,
+                    ),
+
+                  const SizedBox(height: 10),
+
                   DropdownButtonFormField<Patient>(
                     value: selectedPatient,
                     decoration: const InputDecoration(
@@ -266,7 +321,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               // ),
               ElevatedButton(
   onPressed: () {
-    if (selectedDentist == null || selectedPatient == null) return;
+    if (selectedDentist == null || selectedPatient == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select patient and dentist')),
+      );
+      return;
+    }
+
+    if (selectedBranch == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a branch or add one from Branches menu'),
+        ),
+      );
+      return;
+    }
 
     final finalDateTime = DateTime(
       selectedDate.year,
@@ -277,12 +346,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     );
 
     if (existing == null) {
-      // CREATE NEW
       _saveAppointment(
-        patientId: selectedPatient!.userId, // <-- _id from API
-        dentistId: selectedDentist!.id, // <-- _id from API
+        patientId: selectedPatient!.userId,
+        dentistId: selectedDentist!.id,
         reason: reasonCtrl.text.trim(),
         date: finalDateTime,
+        branchId: selectedBranch?.id,
       );
     } else {
       // UPDATE EXISTING
@@ -427,15 +496,17 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   required String patientId,
   required String reason,
   required String dentistId,
+  String? branchId,
 }) async {
   final newStart = date;
-  final newEnd = date.add(const Duration(minutes: 30)); // match your backend duration
+  final newEnd = date.add(const Duration(minutes: 30));
 
   try {
     await appointmentService.createAppointment({
       "patientId": patientId,
       "reason": reason,
       "dentist": dentistId,
+      if (branchId != null && branchId.isNotEmpty) "branch": branchId,
       "startTime": newStart.toUtc().toIso8601String(),
       "endTime": newEnd.toUtc().toIso8601String(),
     });
@@ -611,6 +682,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                   columns: const [
                     DataColumn(label: Text("Time")),
                     DataColumn(label: Text("Patient")),
+                    DataColumn(label: Text("Branch")),
                     DataColumn(label: Text("Mobile")),
                     DataColumn(label: Text("Dentist")),
                     DataColumn(label: Text("Reason")),
@@ -627,7 +699,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                       DataCell(Text(
                           "${a.startTime.hour.toString().padLeft(2, '0')}:${a.startTime.minute.toString().padLeft(2, '0')}")),
                       DataCell(Text(patient)),
-                      DataCell(Text("N/A")), // replace with your mobile logic
+                      DataCell(Text(a.notes ?? '—')),
+                      DataCell(Text("N/A")),
                       DataCell(Text(dentist)),
                       DataCell(Text(reason)),
                     ]);
@@ -777,6 +850,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             startTime: a.startTime.toLocal(),
             endTime: a.endTime.toLocal(),
             subject: "$patientName - ${a.reason} ($dentistName)",
+            notes: a.branch?.name ?? '',
             color: Colors.green,
           );
         }).toList();

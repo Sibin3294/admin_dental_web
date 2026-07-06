@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'package:dental_admin_web/config/api_config.dart';
 import 'package:dental_admin_web/models/all_payment.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/payment.dart';
 
 class PaymentService {
-  final String baseUrl = "https://dental-backend-0e7e.onrender.com/api/payments";
+  String get baseUrl => ApiConfig.payments;
 
   /// Fetch payments by patient ID
   Future<List<Payment>> getPaymentsByPatient(String patientId) async {
@@ -47,7 +48,7 @@ class PaymentService {
 // }
  
   static Future<int> getPaymentCount() async {
-    final response = await http.get(Uri.parse("https://dental-backend-0e7e.onrender.com/api/payments/getAllPayments"));
+    final response = await http.get(Uri.parse('${ApiConfig.payments}/getAllPayments'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

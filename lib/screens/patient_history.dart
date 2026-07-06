@@ -287,6 +287,17 @@ class PatientHistoryPage extends StatelessWidget {
                                     fontSize: 14, color: Colors.black87),
                               ),
 
+                              if (item.branch != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Branch: ${item.branch!.name}",
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+
                               const SizedBox(height: 8),
 
                               // STATUS

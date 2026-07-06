@@ -17,6 +17,7 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
 
   // --- FILTER CONTROLLERS ---
   String? selectedDentist;
+  String? selectedBranch;
   String? selectedStatus;
   String selectedSort = 'Latest'; // Latest / Oldest
   DateTime? selectedDate;
@@ -47,6 +48,13 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
     if (selectedDentist != null && selectedDentist!.isNotEmpty) {
       temp = temp
           .where((a) => a.dentist != null && a.dentist!.name == selectedDentist)
+          .toList();
+    }
+
+    // Filter by branch
+    if (selectedBranch != null && selectedBranch!.isNotEmpty) {
+      temp = temp
+          .where((a) => a.branch != null && a.branch!.name == selectedBranch)
           .toList();
     }
 
@@ -262,6 +270,29 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                           ],
                         ),
 
+                        // Branch filter
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.location_on, color: Colors.teal),
+                            const SizedBox(width: 6),
+                            DropdownButton<String>(
+                              hint: const Text("Branch"),
+                              value: selectedBranch,
+                              items: allAppointments
+                                  .map((a) => a.branch?.name ?? 'No Branch')
+                                  .toSet()
+                                  .map((name) => DropdownMenuItem(
+                                      value: name, child: Text(name)))
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() => selectedBranch = value);
+                                applyFilters();
+                              },
+                            ),
+                          ],
+                        ),
+
                         // Status filter
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -360,6 +391,7 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                           onPressed: () {
                             setState(() {
                               selectedDentist = null;
+                              selectedBranch = null;
                               selectedStatus = null;
                               selectedDate = null;
                               filterByWeek = false;
@@ -463,7 +495,28 @@ class _AllAppointmentsPageState extends State<AllAppointmentsPage> {
                                 color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 8),
+
+                            /// BRANCH
+                            if (appt.branch != null)
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on,
+                                      size: 20, color: Colors.teal),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      appt.branch!.name,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                            if (appt.branch != null) const SizedBox(height: 8),
 
                             /// DATE
                             Row(

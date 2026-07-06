@@ -40,7 +40,7 @@ class _AddPatientPageState extends State<AddPatientPage> {
     if (widget.isEdit && widget.patient != null) {
       nameCtrl.text = widget.patient!.name;
       emailCtrl.text = widget.patient!.email;
-      pwdCtrl.text = widget.patient!.password;
+      pwdCtrl.text = widget.patient!.password ?? '';
     }
   }
 

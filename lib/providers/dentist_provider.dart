@@ -1,4 +1,5 @@
 
+import 'package:dental_admin_web/models/dentist_attendance_model.dart';
 import 'package:flutter/material.dart';
 import '../models/dentist.dart';
 import '../services/dentist_service.dart';
@@ -6,6 +7,8 @@ import '../services/dentist_service.dart';
 class DentistsProvider with ChangeNotifier {
   List<Dentist> _dentists = [];
   List<Dentist> get dentist => _dentists;
+    bool isSaving = false;
+  String? error;
 
   final DentistService _service = DentistService();
 
@@ -126,7 +129,5 @@ Future<bool> updateDentist(
     return false;
   }
 }
-
-
 
 }

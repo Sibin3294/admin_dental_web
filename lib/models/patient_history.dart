@@ -86,11 +86,14 @@
 
 import 'dart:convert';
 
+import 'package:dental_admin_web/models/branch.dart';
+
 class PatientHistory {
   final String id;
   final Patient patient;
   final String reason;
   final Dentist dentist;
+  final Branch? branch;
   final DateTime startTime;
   final DateTime endTime;
   final String status;
@@ -102,6 +105,7 @@ class PatientHistory {
     required this.patient,
     required this.reason,
     required this.dentist,
+    this.branch,
     required this.startTime,
     required this.endTime,
     required this.status,
@@ -115,6 +119,9 @@ class PatientHistory {
       patient: Patient.fromJson(json['patientId'] ?? <String, dynamic>{}),
       reason: (json['reason'] ?? '').toString(),
       dentist: Dentist.fromJson(json['dentist'] ?? <String, dynamic>{}),
+      branch: json['branch'] != null
+          ? Branch.fromJson(json['branch'] as Map<String, dynamic>)
+          : null,
       startTime: json['startTime'] != null
           ? DateTime.parse(json['startTime'])
           : DateTime.now(),
